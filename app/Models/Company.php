@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Company extends Model
 {
@@ -24,5 +24,10 @@ class Company extends Model
      * non existing fields in th request they will be dropped and no error will be thrown.
      */
     protected $fillable = ['name', 'email', 'address', 'website'];
+
+    public function contacts()
+    {
+        return $this->hasMany(Contact::class);
+    }
 
 }
