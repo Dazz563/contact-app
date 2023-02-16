@@ -23,10 +23,14 @@ use App\Http\Controllers\ContactNoteController;
 Route::get('/', WelcomeController::class);
 
 // grouped contact routes
-Route::controller(ContactController::class)->group(function() {
+Route::controller(ContactController::class)->group(function () {
     Route::get('/contacts', 'index')->name('contacts.index');
+    Route::post('/contacts', 'store')->name('contacts.store');
     Route::get('/contacts/create', 'create')->name('contacts.create');
     Route::get('/contacts/{id}', 'show')->name('contacts.show');
+    Route::get('/contacts/{id}/edit', 'edit')->name('contacts.edit');
+    Route::put('/contacts/{id}', 'update')->name('contacts.update');
+    Route::delete('/contacts/{id}', 'destroy')->name('contacts.destroy');
 });
 
 // nested resourses (left side of dot notation is parent resouce name, right side is the child resource)
@@ -56,6 +60,6 @@ Route::resources([
 ]);
 
 
-Route::fallback(function() {
+Route::fallback(function () {
     return "<h1>Sorry, the page does not exist</h1>";
 });

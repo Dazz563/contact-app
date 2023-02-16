@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use App\Repositories\CompanyRepository;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class ContactController extends Controller
 {
@@ -17,29 +16,95 @@ class ContactController extends Controller
 
     public function index(CompanyRepository $company, Request $req)
     {
-        $companies = $company->pluck();
-        // $contacts = Contact::latest()->paginate(10);
-        $contactsCollection = Contact::latest()->get();
-        $perPage = 10;
-        $currentPage = request()->query('page', 1);
-        $items = $contactsCollection->slice(($currentPage * $perPage) - $perPage, $perPage)->values();
-        $total = $contactsCollection->count();
-        $contacts = new LengthAwarePaginator($items, $total, $perPage, $currentPage, [
-            'path' => request()->url(),
-            'query' => request()->query()
-        ]);
+        $companies = $this->company->pluck();
+
+        $contacts = Contact::latest()->where(function ($query) {
+            if ($companyId = request()->query('company_id')) {
+                $query->where('company_id', $companyId);
+            }
+        })->paginate(10);
+
         return view('contacts.index', compact('contacts', 'companies'));
     }
 
     public function create()
     {
-        return view('contacts.create');
+        // dd(request()->path());
+        // dd(request()->method());
+        // dd(request()->url());
+        // dd(request()->ip());
+        // dd(request()->isMethod('post'));
+        $companies = $this->company->pluck();
+        $contact = new Contact();
+
+        return view('contacts.create', compact('companies', 'contact'));
     }
 
     public function show($id)
     {
-        
-        $contact =Contact::findOrFail($id);
+
+        $contact = Contact::findOrFail($id);
         return view('contacts.show')->with('contact', $contact);
+    }
+
+    public function store(Request $req)
+    {
+        // dd($req);
+        // dd($req->input());
+        // dd($req->input('first_name'));
+        // dd($req->input('last_name'));
+
+        $req->validate([
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'email' => 'required|email',
+            'phone' => 'nullable',
+            'address' => 'nullable',
+            'company_id' => 'required|exists:companies,id',
+        ]);
+        // dd($req->all());
+        Contact::create($req->all());
+
+        // sending the res as JSON
+        // $contact = Contact::create($req->all());
+        // return response()->json([
+        //     'success' => true,
+        //     'data' => $contact,
+        // ]);
+
+        return redirect()->route('contacts.index')->with('message', 'Contact has been added successfully');
+    }
+
+    public function edit($id)
+    {
+        $companies = $this->company->pluck();
+
+        $contact = Contact::findOrFail($id);
+        return view('contacts.edit', compact('companies', 'contact'));
+    }
+
+    public function update(Request $req, $id)
+    {
+        $contact = Contact::findOrFail($id);
+
+        $req->validate([
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'email' => 'required|email',
+            'phone' => 'nullable',
+            'address' => 'nullable',
+            'company_id' => 'required|exists:companies,id',
+        ]);
+        $contact->update($req->all());
+
+        return redirect()->route('contacts.index')->with('message', 'Contact has been updated successfully');
+    }
+
+    public function destroy($id)
+    {
+        $contact = Contact::findOrFail($id);
+        $contact->delete();
+
+        return back()->with('message', 'Contact has been deleted successfully');
     }
 }

@@ -9,7 +9,7 @@ class Contact extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['first_name', 'last_name', 'email', 'phone', 'address'];
+    protected $fillable = ['first_name', 'last_name', 'email', 'phone', 'address', 'company_id'];
 
     public function company()
     {
@@ -20,5 +20,4 @@ class Contact extends Model
     {
         return $this->hasMany(Task::class);
     }
-
 }
