@@ -1,7 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TagController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\ContactNoteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,17 +20,46 @@ use App\Http\Controllers\ContactController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', WelcomeController::class);
 
-Route::controller(ContactController::class)->group(function() {
+// grouped contact routes
+Route::controller(ContactController::class)->group(function () {
     Route::get('/contacts', 'index')->name('contacts.index');
+    Route::post('/contacts', 'store')->name('contacts.store');
     Route::get('/contacts/create', 'create')->name('contacts.create');
     Route::get('/contacts/{id}', 'show')->name('contacts.show');
+    Route::get('/contacts/{id}/edit', 'edit')->name('contacts.edit');
+    Route::put('/contacts/{id}', 'update')->name('contacts.update');
+    Route::delete('/contacts/{id}', 'destroy')->name('contacts.destroy');
 });
 
+// nested resourses (left side of dot notation is parent resouce name, right side is the child resource)
+Route::resource('/contacts.notes', ContactNoteController::class);
+// ALSO SEEMS TO BE REMOVED IN VERSION 9
+// resource route (for a resource controller) prevents calling them one by one
+Route::resource('/companies', CompanyController::class)->shallow();
 
-Route::fallback(function() {
+// THIS FEATURE SEEMS TO BE REMOVED IN LARAVEL 9.5
+// partial resource routes (pass routes to want to include) (can also use ->except() for reverse effect)
+// Route::resource('activities', ActivityController::class)-only([
+//     'create', 'store', 'edit', 'update', 'destroy'
+// ]);
+// Route::resource('pactivitieshotos', ActivityController::class)->except([
+//     'index', 'show'
+// ]);
+// Route::only(['create', 'store', 'edit', 'update', 'destroy'])->resource('activities', ActivityController::class);
+
+
+
+// adding a route to a resource controller (MUST BE ADDED BEFORE CALLING THE RESOURCE ROUTE)
+Route::get('/tags/testing', [TagController::class, 'testing']);
+// listing multiple resource controllers
+Route::resources([
+    '/tags' => TagController::class,
+    '/tasks' => TaskController::class
+]);
+
+
+Route::fallback(function () {
     return "<h1>Sorry, the page does not exist</h1>";
 });
