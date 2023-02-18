@@ -4,13 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    // BOTH THESE METHODS BELOW ALLOW FOR: Company::create($incomingData); else,
-    // you will have to assign every single field...
+    // BOTH THESE METHODS BELOW ALLOW FOR MASS ASSIGNMENT: Company::create($incomingData); else,
+    // OR...
+    // you will have to assign every single field like this...
     // $company = new Company;
     // $company->name = $req->companyName
     // $company->address = $req->address
@@ -29,5 +31,4 @@ class Company extends Model
     {
         return $this->hasMany(Contact::class);
     }
-
 }

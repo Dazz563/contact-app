@@ -11,7 +11,12 @@
               <div class="card">
                   <div class="card-header card-title">
                     <div class="d-flex align-items-center">
-                      <h2 class="mb-0">All Contacts</h2>
+                      <h2 class="mb-0">
+                        All Contacts
+                        @if (request()->query('trash'))
+                          <small>(In Trash)</small>
+                        @endif
+                      </h2>
                       <div class="ml-auto">
                         <a href="{{ route('contacts.create') }}" class="btn btn-success"><i class="fa fa-plus-circle"></i> Add New</a>
                       </div>
@@ -22,7 +27,16 @@
                   @include('contacts._filter')
 
                   @if ($message = session('message'))
-                      <div class="alert alert-success">{{ $message }}</div>
+                      <div class="alert alert-success">
+                        {{ $message }}
+                        @if ($undoRoute = session('undoRoute'))
+                          <form action="{{ $undoRoute }}" method="post" style="display: inline">
+                            @csrf
+                            @method('delete')
+                            <button class="btn alert-link">Undo</button>
+                          </form>
+                        @endif
+                      </div>
                   @endif
 
                   <table class="table table-striped table-hover">
@@ -37,6 +51,9 @@
                       </tr>
                     </thead>
                     <tbody>
+                      @php
+                        $showTrashButtons = request()->query('trash') ? true : false
+                      @endphp
                         @if(count($contacts) > 0)
                             @foreach ($contacts as $index => $contact)
                                 @include('contacts._contact', ['contact' => $contact, 'index' => $index])                           

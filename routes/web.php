@@ -22,16 +22,22 @@ use App\Http\Controllers\ContactNoteController;
 
 Route::get('/', WelcomeController::class);
 
+Route::resource('/contacts', ContactController::class);
+Route::delete('/contacts/{contact}/restore', [ContactController::class, 'restore'])->name('contacts.restore');
+Route::delete('/contacts/{contact}/force-delete', [ContactController::class, 'forceDelete'])->name('contacts.force-delete');
+
 // grouped contact routes
-Route::controller(ContactController::class)->group(function () {
-    Route::get('/contacts', 'index')->name('contacts.index');
-    Route::post('/contacts', 'store')->name('contacts.store');
-    Route::get('/contacts/create', 'create')->name('contacts.create');
-    Route::get('/contacts/{id}', 'show')->name('contacts.show');
-    Route::get('/contacts/{id}/edit', 'edit')->name('contacts.edit');
-    Route::put('/contacts/{id}', 'update')->name('contacts.update');
-    Route::delete('/contacts/{id}', 'destroy')->name('contacts.destroy');
-});
+// Route::controller(ContactController::class)->group(function () {
+//     Route::get('/contacts', 'index')->name('contacts.index');
+//     Route::post('/contacts', 'store')->name('contacts.store');
+//     Route::get('/contacts/create', 'create')->name('contacts.create');
+//     Route::get('/contacts/{id}', 'show')->name('contacts.show');
+//     Route::get('/contacts/{id}/edit', 'edit')->name('contacts.edit');
+//     Route::put('/contacts/{id}', 'update')->name('contacts.update');
+//     Route::delete('/contacts/{contact}', 'destroy')->name('contacts.destroy');
+//     Route::all('/contacts/{contact}/restore', 'restore')->name('contacts.restore');
+//     Route::all('/contacts/{contact}/force-delete', 'forceDelete')->name('contacts.force-delete');
+// });
 
 // nested resourses (left side of dot notation is parent resouce name, right side is the child resource)
 Route::resource('/contacts.notes', ContactNoteController::class);
