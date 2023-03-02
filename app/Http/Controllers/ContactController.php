@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ContactRequest;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,28 +44,18 @@ class ContactController extends Controller
         return view('contacts.create', compact('companies', 'contact'));
     }
 
-    public function show($id)
+    public function show(Contact $contact)
     {
-
-        $contact = Contact::findOrFail($id);
         return view('contacts.show')->with('contact', $contact);
     }
 
-    public function store(Request $req)
+    public function store(ContactRequest $req)
     {
         // dd($req);
         // dd($req->input());
         // dd($req->input('first_name'));
         // dd($req->input('last_name'));
 
-        $req->validate([
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'email' => 'required|email',
-            'phone' => 'nullable',
-            'address' => 'nullable',
-            'company_id' => 'required|exists:companies,id',
-        ]);
         // dd($req->all());
         Contact::create($req->all());
 
@@ -78,34 +69,22 @@ class ContactController extends Controller
         return redirect()->route('contacts.index')->with('message', 'Contact has been added successfully');
     }
 
-    public function edit($id)
+    public function edit(Contact $contact)
     {
         $companies = $this->company->pluck();
 
-        $contact = Contact::findOrFail($id);
         return view('contacts.edit', compact('companies', 'contact'));
     }
 
-    public function update(Request $req, $id)
+    public function update(ContactRequest $req, Contact $contact)
     {
-        $contact = Contact::findOrFail($id);
-
-        $req->validate([
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'email' => 'required|email',
-            'phone' => 'nullable',
-            'address' => 'nullable',
-            'company_id' => 'required|exists:companies,id',
-        ]);
         $contact->update($req->all());
 
         return redirect()->route('contacts.index')->with('message', 'Contact has been updated successfully');
     }
 
-    public function destroy($id)
+    public function destroy(Contact $contact)
     {
-        $contact = Contact::findOrFail($id);
         $contact->delete();
         $redirect = request()->query('redirect');
 
@@ -114,9 +93,8 @@ class ContactController extends Controller
             ->with('undoRoute',  $this->getUndoRoute('contacts.restore', $contact));
     }
 
-    public function restore($id)
+    public function restore(Contact $contact)
     {
-        $contact = Contact::onlyTrashed()->findOrFail($id);
         $contact->restore();
 
         return back()
@@ -129,9 +107,8 @@ class ContactController extends Controller
         return request()->missing('undo') ? route($name, [$resource->id, 'undo' => true]) : null;
     }
 
-    public function forceDelete($id)
+    public function forceDelete(Contact $contact)
     {
-        $contact = Contact::onlyTrashed()->findOrFail($id);
         $contact->forceDelete();
 
         return back()
